@@ -28,8 +28,8 @@ The tool automatically gets the path, logs into your server and `cd`'s into the 
 **Note:** Your mac and server should be [configured for passwordless SSH](https://www.tecmint.com/ssh-passwordless-login-using-ssh-keygen-in-5-easy-steps/) for this to work.
 
 ## Troubleshooting/Error Reporting/Contributing
- - If you face an error, you may debug using a HTTP Requests tool/monitor on your router's configuration webpage. Additionally, you may open a new issue on this repo prefixed by [Bug]
- - If you would like to help improve the package, request features or add functionality, open an issue prefixed by [Feature Request] or [Improvement]
+ - If you face an error you may open a new issue on this repo prefixed by [Bug]
+ - If you would like to help improve the project, request features or add functionality, open an issue prefixed by [Feature Request] or [Improvement]
 
 ## PRs and Commit Template
 PRs and commits that you make to this repo must include the following:  
