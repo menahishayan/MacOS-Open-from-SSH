@@ -1,37 +1,33 @@
-on list2string(theList, theDelimiter)
-	set theBackup to AppleScript's text item delimiters
-	set AppleScript's text item delimiters to theDelimiter
-	set theString to theList as string
-	set AppleScript's text item delimiters to theBackup
-	return theString
-end list2string
+const username = 'shayan'
+const hostname = 'home.local'
+const publicPath = '/home/shares/public/'
+const userPath = '/home/'
 
-tell application "Finder"
-	set sel to item 1 of (get selection)
-	if class of sel is folder then
-		set currentDir to sel as text
-	else
-		set currentDir to (container of sel) as text
-	end if
-end tell
-set oldDelimiters to AppleScript's text item delimiters
-set AppleScript's text item delimiters to "/"
-set pathStr to every text item of (POSIX path of currentDir)
-set AppleScript's text item delimiters to oldDelimiters
-if item 2 of pathStr is "Volumes" then
-	if (count of pathStr) ³ 4 then
-		if item 3 of pathStr is "public" then
-			set sshCommand to "cd /home/shares/public/" & list2string((items 4 thru -2 of pathStr), "/") & "; bash --login"
-		else
-			set sshCommand to "cd /home/" & item 3 of pathStr & "/" & list2string((items 4 thru -2 of pathStr), "/") & "; bash --login"
-		end if
-		tell application "Terminal"
-			do script "ssh " & item 3 of pathStr & "@home.local -t " & (quoted form of sshCommand)
-		end tell
-	else
-		display dialog "Incorrect network location" buttons {"OK"} default button "OK"
-	end if
-else
-	display dialog "Current folder is not a network location" buttons {"OK"} default button "OK"
-end if
+function posixPath(finderWin) {
+  return $.NSURL.alloc.initWithString(finderWin.target.url()).fileSystemRepresentation
+}
 
+var app = Application.currentApplication()
+	app.includeStandardAdditions = true
+
+var pathItems = posixPath(Application('Finder').finderWindows[0]).split("/")
+pathItems.shift()
+pathItems
+if(pathItems[0] == "Volumes" && pathItems.length >= 3) {
+		var remotePath = pathItems.slice(2).join("/").replace(" ", "\\ ");
+		
+		var Terminal = Application('Terminal');
+		Terminal.activate();
+		var targetWindow = Terminal.windows[0];
+		Terminal.doScript(`ssh ${username}@${hostname} -t "cd ${pathItems[1] == "public" ? publicPath : userPath + pathItems[1]}/${remotePath}; bash --login"`, targetWindow);
+} else {
+	app.beep()
+	var oAns = app.displayAlert(
+	"Not A Network Folder",
+	{
+		message: "The folder you've selected is not on a remote volume. Please select a different folder.",
+		as:  "critical",
+		buttons: ['OK'],
+		defaultButton: 1
+	})
+}
